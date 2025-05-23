@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL") // Put your DB URL in .env
+}
+
+model Medecin {
+  id        Int       @id @default(autoincrement())
+  nom       String
+  specialite String?
+
+  patients  Patient[]
+}
+
+model Patient {
+  id                  Int       @id @default(autoincrement())
+  
+  // Infos personnelles
+  prenom              String
+  nom                 String
+  date_naissance      DateTime
+  sexe                String    // Validate manually ('Homme', 'Femme', 'Autre')
+  cin_passeport       String?   @unique
+  photo_profil        String?
+
+  // Coordonnées
+  telephone           String?
+  email               String?
+  adresse             String?
+
+  // Compte
+  nom_utilisateur     String?   @unique
+  mot_de_passe        String?
+
+  // Infos médicales
+  groupe_sanguin      String?
+  niveau_autonomie    String?
+  antecedents_medicaux String?
+  pathologies_chroniques String?
+  allergies           String?
+  medicaments         String?
+  taille_cm           Int?
+  poids_kg            Int?
+  statut_tabac        String?
+  consommation_alcool String?
+
+  // Infos administratives
+  assurance           String?
+  numero_police       String?
+  numero_dossier      String?   @unique
+  medecin_id          Int? 
+  medecin             Medecin?  @relation(fields: [medecin_id], references: [id], onDelete: SetNull)
+
+  // Autres
+  etat_civil          String?
+  profession          String?
+  langue_preferee     String?
+  consentement        Boolean   @default(false)
+
+  date_creation       DateTime  @default(now())
+
+  contacts_urgence    ContactUrgence[]
+  documents_patient   DocumentPatient[]
+}
+
+model ContactUrgence {
+  id           Int     @id @default(autoincrement())
+  patient_id   Int
+  nom_complet  String
+  relation     String?
+  telephone    String
+
+  patient      Patient @relation(fields: [patient_id], references: [id], onDelete: Cascade)
+}
+
+model DocumentPatient {
+  id             Int     @id @default(autoincrement())
+  patient_id     Int
+  nom_fichier    String?
+  url            String?
+  type_document  String?
+  date_upload    DateTime @default(now())
+
+  patient        Patient @relation(fields: [patient_id], references: [id], onDelete: Cascade)
+}
