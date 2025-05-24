@@ -4,66 +4,94 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL") // Put your DB URL in .env
+  url      = env("DATABASE_URL")
 }
 
 model Medecin {
-  id        Int       @id @default(autoincrement())
-  nom       String
-  specialite String?
+  id          Int       @id @default(autoincrement())
+  nom         String
+  specialite  String?
 
-  patients  Patient[]
+  patients    Patient[]
+
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+}
+
+model TypeIdentite {
+  id          Int      @id @default(autoincrement())
+  nom         String   @unique
+  description String?
+
+  patients    Patient[]
+
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+}
+
+model DocumentParametrage {
+  id          Int      @id @default(autoincrement())
+  nom         String   @unique
+  description String?
+
+  documents   DocumentPatient[]
+
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
 }
 
 model Patient {
-  id                  Int       @id @default(autoincrement())
-  
-  // Infos personnelles
-  prenom              String
-  nom                 String
-  date_naissance      DateTime
-  sexe                String    // Validate manually ('Homme', 'Femme', 'Autre')
-  cin_passeport       String?   @unique
-  photo_profil        String?
+  id                    Int       @id @default(autoincrement())
+  prenom                String
+  nom                   String
+  date_naissance        DateTime
+  sexe                  String
+  type_identite_id      Int?
+  identifiant           String?
+  type_identite         TypeIdentite? @relation(fields: [type_identite_id], references: [id], onDelete: SetNull)
+  photo_profil          String?
 
-  // Coordonnées
-  telephone           String?
-  email               String?
-  adresse             String?
+  telephone             String?
+  email                 String?
+  adresse               String?
 
-  // Compte
-  nom_utilisateur     String?   @unique
-  mot_de_passe        String?
+  nom_utilisateur       String?   @unique
+  mot_de_passe          String?
 
-  // Infos médicales
-  groupe_sanguin      String?
-  niveau_autonomie    String?
-  antecedents_medicaux String?
-  pathologies_chroniques String?
-  allergies           String?
-  medicaments         String?
-  taille_cm           Int?
-  poids_kg            Int?
-  statut_tabac        String?
-  consommation_alcool String?
+  groupe_sanguin        String?
+  niveau_autonomie      String?
+  taille_cm             Int?
+  poids_kg              Int?
+  statut_tabac          String?
+  consommation_alcool   String?
 
-  // Infos administratives
-  assurance           String?
-  numero_police       String?
-  numero_dossier      String?   @unique
-  medecin_id          Int? 
-  medecin             Medecin?  @relation(fields: [medecin_id], references: [id], onDelete: SetNull)
+  assurance             String?
+  numero_police         String?
+  numero_dossier        String?   @unique
+  medecin_id            Int?
+  medecin               Medecin?  @relation(fields: [medecin_id], references: [id], onDelete: SetNull)
 
-  // Autres
-  etat_civil          String?
-  profession          String?
-  langue_preferee     String?
-  consentement        Boolean   @default(false)
+  statuts               String?
+  service               String?
+  priorite              String?
+  dernier_visite        DateTime?
 
-  date_creation       DateTime  @default(now())
+  etat_civil            String?
+  profession            String?
+  langue_preferee       String?
+  consentement          Boolean   @default(false)
 
-  contacts_urgence    ContactUrgence[]
-  documents_patient   DocumentPatient[]
+  date_creation         DateTime  @default(now())
+  created_at            DateTime  @default(now())
+  updated_at            DateTime  @updatedAt
+
+  contacts_urgence      ContactUrgence[]
+  documents_patient     DocumentPatient[]
+  historiques           HistoriquePatient[]
+
+  allergies             PatientAllergie[]
+  pathologies           PatientPathologie[]
+  antecedents           PatientAntecedentMedical[]
 }
 
 model ContactUrgence {
@@ -74,15 +102,91 @@ model ContactUrgence {
   telephone    String
 
   patient      Patient @relation(fields: [patient_id], references: [id], onDelete: Cascade)
+
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
 }
 
 model DocumentPatient {
-  id             Int     @id @default(autoincrement())
-  patient_id     Int
-  nom_fichier    String?
-  url            String?
-  type_document  String?
-  date_upload    DateTime @default(now())
+  id                      Int     @id @default(autoincrement())
+  patient_id              Int
+  document_parametrage_id Int
+  nom_fichier             String?
+  url                     String?
+  date_upload             DateTime @default(now())
 
-  patient        Patient @relation(fields: [patient_id], references: [id], onDelete: Cascade)
+  patient                 Patient @relation(fields: [patient_id], references: [id], onDelete: Cascade)
+  type                    DocumentParametrage @relation(fields: [document_parametrage_id], references: [id])
+
+  created_at              DateTime @default(now())
+  updated_at              DateTime @updatedAt
+}
+
+model HistoriquePatient {
+  id              Int      @id @default(autoincrement())
+  patient_id      Int
+  attribut        String
+  ancienne_valeur String?
+  nouvelle_valeur String?
+  modifie_le      DateTime  @default(now())
+  modifie_par     String?
+
+  patient         Patient   @relation(fields: [patient_id], references: [id], onDelete: Cascade)
+
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+}
+
+model Allergie {
+  id         Int       @id @default(autoincrement())
+  nom        String    @unique
+  patients   PatientAllergie[]
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+}
+
+model PatientAllergie {
+  patient_id   Int
+  allergie_id  Int
+  patient      Patient  @relation(fields: [patient_id], references: [id], onDelete: Cascade)
+  allergie     Allergie @relation(fields: [allergie_id], references: [id], onDelete: Cascade)
+
+  @@id([patient_id, allergie_id])
+}
+
+model PathologieChronique {
+  id         Int       @id @default(autoincrement())
+  nom        String    @unique
+  patients   PatientPathologie[]
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+}
+
+model PatientPathologie {
+  patient_id     Int
+  pathologie_id  Int
+  patient        Patient             @relation(fields: [patient_id], references: [id], onDelete: Cascade)
+  pathologie     PathologieChronique @relation(fields: [pathologie_id], references: [id], onDelete: Cascade)
+
+  @@id([patient_id, pathologie_id])
+}
+
+model AntecedentMedical {
+  id         Int       @id @default(autoincrement())
+  nom        String    @unique
+  patients   PatientAntecedentMedical[]
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+}
+
+model PatientAntecedentMedical {
+  patient_id     Int
+  antecedent_id  Int
+  patient        Patient           @relation(fields: [patient_id], references: [id], onDelete: Cascade)
+  antecedent     AntecedentMedical @relation(fields: [antecedent_id], references: [id], onDelete: Cascade)
+
+  @@id([patient_id, antecedent_id])
 }
