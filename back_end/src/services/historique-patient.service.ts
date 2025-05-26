@@ -32,10 +32,7 @@ export const findById = async (id: number): Promise<IHistoriquePatient | null> =
 // Create new historique
 export const create = async (data: ICreateHistoriquePatientDto): Promise<IHistoriquePatient> => {
   return prisma.historiquePatient.create({
-    data: {
-      ...data,
-      modifie_le: new Date()
-    }
+    data
   }) as unknown as IHistoriquePatient;
 };
 

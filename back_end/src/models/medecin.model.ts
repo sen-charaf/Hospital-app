@@ -15,23 +15,11 @@ export interface ICreateMedecinDto {
 // Interface for updating an existing medecin
 export interface IUpdateMedecinDto extends Partial<ICreateMedecinDto> {}
 
-// Interface for medecin with related entities
-export interface IMedecinWithRelations extends IMedecin {
-  patients?: {
-    id: number;
-    prenom: string;
-    nom: string;
-    date_naissance: Date | string;
-    sexe: string;
-  }[];
-}
-
 // Response DTO for medecin data
 export interface IMedecinResponseDto {
   id: number;
   nom: string;
   specialite?: string | null;
-  patients_count?: number;
   created_at: string;
   updated_at: string;
 }
