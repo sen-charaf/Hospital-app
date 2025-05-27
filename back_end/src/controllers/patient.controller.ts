@@ -1,66 +1,57 @@
-import { Request, Response } from 'express';
+
+import { Request, Response, NextFunction } from 'express';
 import * as patientService from '../services/patient.service';
+import { AppError } from '../utils/app-error';
 
 // Get all patients
-export const getAllPatients = async (req: Request, res: Response) => {
+export const getAllPatients = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const patients = await patientService.findAll();
-    res.json(patients);
+    res.status(200).json(patients);
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-    res.status(500).json({ error: errorMessage });
+    next(error);
   }
 };
 
 // Get patient by ID
-export const getPatientById = async (req: Request, res: Response) => {
+export const getPatientById = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.params;
-    const patient = await patientService.findById(Number(id));
-    
-    if (!patient) {
-      res.status(404).json({ error: 'Patient non trouvé' });
-      return;
-    }
-    
-    res.json(patient);
+    const id = parseInt(req.params.id);
+    const patient = await patientService.findById(id);
+    res.status(200).json(patient);
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-    res.status(500).json({ error: errorMessage });
+    next(error);
   }
 };
 
 // Create new patient
-export const createPatient = async (req: Request, res: Response) => {
+export const createPatient = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const patient = await patientService.create(req.body);
     res.status(201).json(patient);
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-    res.status(400).json({ error: errorMessage });
+    next(error);
   }
 };
 
 // Update patient
-export const updatePatient = async (req: Request, res: Response) => {
+export const updatePatient = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.params;
-    const patient = await patientService.update(Number(id), req.body);
-    res.json(patient);
+    const id = parseInt(req.params.id);
+    const patient = await patientService.update(id, req.body);
+    res.status(200).json(patient);
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-    res.status(400).json({ error: errorMessage });
+    next(error);
   }
 };
 
 // Delete patient
-export const deletePatient = async (req: Request, res: Response) => {
+export const deletePatient = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.params;
-    await patientService.remove(Number(id));
+    const id = parseInt(req.params.id);
+    await patientService.remove(id);
     res.status(204).send();
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-    res.status(400).json({ error: errorMessage });
+    next(error);
   }
 };

@@ -1,32 +1,36 @@
-import { Patient, ContactUrgence, DocumentPatient, PatientAllergie, PatientPathologie, PatientAntecedentMedical } from '@prisma/client';
+import { Patient } from '@prisma/client';
+import { IContactUrgenceResponseDto } from './contact-urgence.model';
+import { IDocumentPatientResponseDto } from './document-patient.model';
+import { IAllergieResponseDto } from './allergie.model';
+import { IPathologieResponseDto } from './pathologie.model';
+import { IAntecedentMedicalResponseDto } from './antecedent-medical.model';
+import { IAssuranceResponseDto } from './assurance.model';
+import { IAuthentificationResponseDto } from './authentification.model';
+import { IMedecinResponseDto } from './medecin.model';
 
 // Basic Patient interface matching Prisma schema
-export interface IPatient extends Omit<Patient, 'date_naissance' | 'dernier_visite' | 'created_at' | 'updated_at' | 'date_creation'> {
+export interface IPatient extends Omit<Patient, 'date_naissance' | 'dernier_visite' | 'created_at' | 'updated_at'> {
   date_naissance: Date | string;
   dernier_visite?: Date | string | null;
-  date_creation: Date | string;
   created_at: Date | string;
   updated_at: Date | string;
 }
 
 // Interface for creating a new patient
 export interface ICreatePatientDto {
+  // Basic Info
   prenom: string;
   nom: string;
   date_naissance: Date | string;
   sexe: string;
-  type_identite_id?: number | null;
-  identifiant?: string | null;
+  type_identifiant: string;
+  identifiant: string;
   photo_profil?: string | null;
   
   // Contact information
   telephone?: string | null;
   email?: string | null;
   adresse?: string | null;
-  
-  // Account information
-  nom_utilisateur?: string | null;
-  mot_de_passe?: string | null;
   
   // Medical information
   groupe_sanguin?: string | null;
@@ -37,10 +41,7 @@ export interface ICreatePatientDto {
   consommation_alcool?: string | null;
   
   // Administrative information
-  assurance?: string | null;
-  numero_police?: string | null;
-  numero_dossier?: string | null;
-  medecin_id?: number | null;
+  medecinId?: number | null;
   
   // Status information
   statuts?: string | null;
@@ -55,13 +56,42 @@ export interface ICreatePatientDto {
   consentement?: boolean;
   
   // Related entities
-  contacts_urgence?: Omit<ContactUrgence, 'id' | 'patient_id' | 'created_at' | 'updated_at'>[];
-  documents_patient?: Omit<DocumentPatient, 'id' | 'patient_id' | 'created_at' | 'updated_at'>[];
+  contacts_urgence?: {
+    nom_complet: string;
+    relation?: string | null;
+    telephone: string;
+  }[];
   
-  // Many-to-many relationships
-  allergies?: number[]; // Array of allergie_id
-  pathologies?: number[]; // Array of pathologie_id
-  antecedents?: number[]; // Array of antecedent_id
+  documents_patient?: {
+    nom_fichier?: string | null;
+    url?: string | null;
+    type: string;
+  }[];
+  
+  allergies?: string[];
+  pathologies?: string[];
+  
+  antecedents?: {
+    antecedent: string;
+    description?: string | null;
+    specialty?: string | null;
+    antecedant_date?: Date | string | null;
+    document1?: string | null;
+    document2?: string | null;
+    document3?: string | null;
+    document4?: string | null;
+    document5?: string | null;
+  }[];
+  
+  assurances?: {
+    assurance: string;
+    numero_police: string;
+  }[];
+  
+  credentials?: {
+    nom_utilisateur: string;
+    mot_de_passe: string;
+  };
 }
 
 // Interface for updating an existing patient
@@ -69,52 +99,14 @@ export interface IUpdatePatientDto extends Partial<ICreatePatientDto> {}
 
 // Interface for patient with related entities
 export interface IPatientWithRelations extends IPatient {
-  medecin?: {
-    id: number;
-    nom: string;
-    specialite?: string | null;
-  } | null;
-  type_identite?: {
-    id: number;
-    nom: string;
-    description?: string | null;
-  } | null;
-  contacts_urgence?: {
-    id: number;
-    nom_complet: string;
-    relation?: string | null;
-    telephone: string;
-  }[];
-  documents_patient?: {
-    id: number;
-    document_parametrage_id: number;
-    nom_fichier?: string | null;
-    url?: string | null;
-    date_upload: Date | string;
-    type: {
-      id: number;
-      nom: string;
-      description?: string | null;
-    };
-  }[];
-  allergies?: {
-    allergie: {
-      id: number;
-      nom: string;
-    };
-  }[];
-  pathologies?: {
-    pathologie: {
-      id: number;
-      nom: string;
-    };
-  }[];
-  antecedents?: {
-    antecedent: {
-      id: number;
-      nom: string;
-    };
-  }[];
+  medecin?: IMedecinResponseDto | null;
+  contacts_urgence?: IContactUrgenceResponseDto[];
+  documents_patient?: IDocumentPatientResponseDto[];
+  allergies?: IAllergieResponseDto[];
+  pathologies?: IPathologieResponseDto[];
+  antecedents?: IAntecedentMedicalResponseDto[];
+  assurances?: IAssuranceResponseDto[];
+  credentials?: IAuthentificationResponseDto | null;
 }
 
 // Response DTO for patient data
@@ -124,7 +116,8 @@ export interface IPatientResponseDto {
   nom: string;
   date_naissance: string;
   sexe: string;
-  identifiant?: string | null;
+  type_identifiant: string;
+  identifiant: string;
   photo_profil?: string | null;
   
   // Contact information
@@ -140,11 +133,6 @@ export interface IPatientResponseDto {
   statut_tabac?: string | null;
   consommation_alcool?: string | null;
   
-  // Administrative information
-  assurance?: string | null;
-  numero_police?: string | null;
-  numero_dossier?: string | null;
-  
   // Status information
   statuts?: string | null;
   service?: string | null;
@@ -158,43 +146,15 @@ export interface IPatientResponseDto {
   consentement: boolean;
   
   // Related entities
-  medecin?: {
-    id: number;
-    nom: string;
-    specialite?: string | null;
-  } | null;
-  type_identite?: {
-    id: number;
-    nom: string;
-  } | null;
-  contacts_urgence?: {
-    id: number;
-    nom_complet: string;
-    relation?: string | null;
-    telephone: string;
-  }[];
-  documents_patient?: {
-    id: number;
-    nom_fichier?: string | null;
-    url?: string | null;
-    date_upload: string;
-    type: {
-      id: number;
-      nom: string;
-    };
-  }[];
-  allergies?: {
-    id: number;
-    nom: string;
-  }[];
-  pathologies?: {
-    id: number;
-    nom: string;
-  }[];
-  antecedents?: {
-    id: number;
-    nom: string;
-  }[];
+  medecin?: IMedecinResponseDto | null;
+  contacts_urgence?: IContactUrgenceResponseDto[];
+  documents_patient?: IDocumentPatientResponseDto[];
+  allergies?: IAllergieResponseDto[];
+  pathologies?: IPathologieResponseDto[];
+  antecedents?: IAntecedentMedicalResponseDto[];
+  assurances?: IAssuranceResponseDto[];
+  credentials?: IAuthentificationResponseDto | null;
   
-  date_creation: string;
+  created_at: string;
+  updated_at: string;
 }

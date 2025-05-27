@@ -6,11 +6,20 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { format } from "date-fns"
 
+interface MedicalCondition {
+  id: string
+  name: string
+  description: string
+  dateAdded: Date
+  notes?: string
+  documents?: File[]
+}
+
 interface ReviewStepProps {
   form: UseFormReturn<any>
-  selectedAllergies: string[]
-  selectedPathologies: string[]
-  selectedAntecedents: string[]
+  selectedAllergies: MedicalCondition[]
+  selectedPathologies: MedicalCondition[]
+  selectedAntecedents: MedicalCondition[]
   selectedMedecin: string
   selectedStatus: string
   selectedService: string
@@ -19,6 +28,7 @@ interface ReviewStepProps {
   selectedAlcoolConsommation: string
   consentAccepted: boolean
   setConsentAccepted: (accepted: boolean) => void
+  insurances: Array<{ id: string; name: string; policyNumber: string }>
 }
 
 const allergiesList = [
@@ -113,6 +123,7 @@ export default function ReviewStep({
   selectedAlcoolConsommation,
   consentAccepted,
   setConsentAccepted,
+  insurances,
 }: ReviewStepProps) {
   return (
     <div className="space-y-6">
@@ -192,20 +203,20 @@ export default function ReviewStep({
           <CardContent className="p-4 space-y-2 text-sm">
             <div>
               <strong>Allergies:</strong>{" "}
-              {selectedAllergies.length > 0
-                ? selectedAllergies.map((id) => allergiesList.find((a) => a.id === id)?.name).join(", ")
-                : "Aucune"}
+              {selectedAllergies.length > 0 ? selectedAllergies.map((allergy) => allergy.name).join(", ") : "Aucune"}
             </div>
             <div>
               <strong>Pathologies:</strong>{" "}
               {selectedPathologies.length > 0
-                ? selectedPathologies.map((id) => pathologiesList.find((p) => p.id === id)?.name).join(", ")
+                ? selectedPathologies.map((pathology) => pathology.name).join(", ")
                 : "Aucune"}
             </div>
             <div>
               <strong>Antécédents:</strong>{" "}
               {selectedAntecedents.length > 0
-                ? selectedAntecedents.map((id) => antecedentsList.find((a) => a.id === id)?.name).join(", ")
+                ? selectedAntecedents
+                    .map((antecedent) => `${antecedent.name} (${format(antecedent.dateAdded, "dd/MM/yyyy")})`)
+                    .join(", ")
                 : "Aucun"}
             </div>
           </CardContent>
@@ -228,6 +239,12 @@ export default function ReviewStep({
             <div>
               <strong>Priorité:</strong>{" "}
               {priorityOptions.find((p) => p.id === selectedPriority)?.name || "Non renseigné"}
+            </div>
+            <div>
+              <strong>Assurances:</strong>{" "}
+              {insurances.length > 0
+                ? insurances.map((ins) => `${ins.name} (${ins.policyNumber})`).join(", ")
+                : "Aucune"}
             </div>
           </CardContent>
         </Card>

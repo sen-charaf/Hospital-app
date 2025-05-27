@@ -8,28 +8,11 @@ export const findAll = async (): Promise<IPatientWithRelations[]> => {
   return prisma.patient.findMany({
     include: {
       medecin: true,
-      type_identite: true,
       contacts_urgence: true,
-      documents_patient: {
-        include: {
-          type: true
-        }
-      },
-      allergies: {
-        include: {
-          allergie: true
-        }
-      },
-      pathologies: {
-        include: {
-          pathologie: true
-        }
-      },
-      antecedents: {
-        include: {
-          antecedent: true
-        }
-      }
+      documents_patient: true,
+      allergies: true,
+      pathologies: true,
+      antecedents: true
     }
   }) as unknown as IPatientWithRelations[];
 };
@@ -40,28 +23,11 @@ export const findById = async (id: number): Promise<IPatientWithRelations | null
     where: { id },
     include: {
       medecin: true,
-      type_identite: true,
       contacts_urgence: true,
-      documents_patient: {
-        include: {
-          type: true
-        }
-      },
-      allergies: {
-        include: {
-          allergie: true
-        }
-      },
-      pathologies: {
-        include: {
-          pathologie: true
-        }
-      },
-      antecedents: {
-        include: {
-          antecedent: true
-        }
-      }
+      documents_patient: true,
+      allergies: true,
+      pathologies: true,
+      antecedents: true
     }
   }) as unknown as IPatientWithRelations | null;
 };
@@ -70,10 +36,12 @@ export const findById = async (id: number): Promise<IPatientWithRelations | null
 export const create = async (data: ICreatePatientDto): Promise<IPatientWithRelations> => {
   const { 
     contacts_urgence, 
-    documents_patient, 
+    documents_patient, // Correctly destructured
     allergies, 
     pathologies, 
-    antecedents, 
+    antecedents,
+    assurances,
+    credentials,
     ...patientData 
   } = data;
   
@@ -83,55 +51,53 @@ export const create = async (data: ICreatePatientDto): Promise<IPatientWithRelat
       contacts_urgence: contacts_urgence ? {
         create: contacts_urgence
       } : undefined,
-      documents_patient: documents_patient && documents_patient.length > 0 ? {
+      
+      documents_patient: documents_patient && documents_patient.length > 0 ? { // Fixed reference
         create: documents_patient
       } : undefined,
+      
       allergies: allergies && allergies.length > 0 ? {
-        create: allergies.map(allergieId => ({
-          allergie: {
-            connect: { id: allergieId }
-          }
-        }))
+        create: allergies.map(nom => ({ allergie: nom }))
       } : undefined,
+      
       pathologies: pathologies && pathologies.length > 0 ? {
-        create: pathologies.map(pathologieId => ({
-          pathologie: {
-            connect: { id: pathologieId }
-          }
+        create: pathologies.map(nom => ({ pathologie: nom }))
+      } : undefined,
+      
+      antecedents: antecedents && antecedents.length > 0 ? {
+        create: antecedents.map(item => ({
+          antecedent: item.antecedent,
+          description: item.description,
+          specialty: item.specialty,
+          antecedant_date: item.antecedant_date,
+          document1: item.document1,
+          document2: item.document2,
+          document3: item.document3,
+          document4: item.document4,
+          document5: item.document5
         }))
       } : undefined,
-      antecedents: antecedents && antecedents.length > 0 ? {
-        create: antecedents.map(antecedentId => ({
-          antecedent: {
-            connect: { id: antecedentId }
-          }
-        }))
+      
+      assurances: assurances && assurances.length > 0 ? {
+        create: assurances
+      } : undefined,
+      
+      credentials: credentials ? {
+        create: {
+          nom_utilisateur: credentials.nom_utilisateur,
+          mot_de_passe: credentials.mot_de_passe
+        }
       } : undefined
     },
     include: {
       medecin: true,
-      type_identite: true,
       contacts_urgence: true,
-      documents_patient: {
-        include: {
-          type: true
-        }
-      },
-      allergies: {
-        include: {
-          allergie: true
-        }
-      },
-      pathologies: {
-        include: {
-          pathologie: true
-        }
-      },
-      antecedents: {
-        include: {
-          antecedent: true
-        }
-      }
+      documents_patient: true,
+      allergies: true,
+      pathologies: true,
+      antecedents: true,
+      assurances: true,
+      credentials: true
     }
   }) as unknown as IPatientWithRelations;
 };
@@ -140,90 +106,113 @@ export const create = async (data: ICreatePatientDto): Promise<IPatientWithRelat
 export const update = async (id: number, data: IUpdatePatientDto): Promise<IPatientWithRelations> => {
   const { 
     contacts_urgence, 
-    documents_patient, 
+    documents_patient, // Changed from documents to documents_patient
     allergies, 
     pathologies, 
-    antecedents, 
+    antecedents,
+    assurances,
+    credentials,
     ...patientData 
   } = data;
   
-  // First, handle the many-to-many relationships if needed
-  if (allergies) {
-    await prisma.patientAllergie.deleteMany({
+  // First, delete existing related records if needed
+  if (contacts_urgence) {
+    await prisma.contactUrgence.deleteMany({
       where: { patient_id: id }
     });
   }
   
-  if (pathologies) {
-    await prisma.patientPathologie.deleteMany({
+  if (documents_patient && documents_patient.length > 0) { // Fixed reference
+    await prisma.documentPatient.deleteMany({
       where: { patient_id: id }
     });
   }
   
-  if (antecedents) {
-    await prisma.patientAntecedentMedical.deleteMany({
+  if (allergies && allergies.length > 0) {
+    await prisma.allergie.deleteMany({
       where: { patient_id: id }
     });
   }
   
+  if (pathologies && pathologies.length > 0) {
+    await prisma.pathologie.deleteMany({
+      where: { patient_id: id }
+    });
+  }
+  
+  if (antecedents && antecedents.length > 0) {
+    await prisma.antecedentMedical.deleteMany({
+      where: { patient_id: id }
+    });
+  }
+  
+  if (assurances && assurances.length > 0) {
+    await prisma.assurance.deleteMany({
+      where: { patient_id: id }
+    });
+  }
+  
+  // Then update the patient with new related records
   return prisma.patient.update({
     where: { id },
     data: {
       ...patientData,
       contacts_urgence: contacts_urgence ? {
-        deleteMany: {},
         create: contacts_urgence
       } : undefined,
-      documents_patient: documents_patient && documents_patient.length > 0 ? {
-        deleteMany: {},
+      
+      documents_patient: documents_patient && documents_patient.length > 0 ? { // Fixed reference
         create: documents_patient
       } : undefined,
+      
       allergies: allergies && allergies.length > 0 ? {
-        create: allergies.map(allergieId => ({
-          allergie: {
-            connect: { id: allergieId }
-          }
-        }))
+        create: allergies.map(nom => ({ allergie: nom }))
       } : undefined,
+      
       pathologies: pathologies && pathologies.length > 0 ? {
-        create: pathologies.map(pathologieId => ({
-          pathologie: {
-            connect: { id: pathologieId }
-          }
+        create: pathologies.map(nom => ({ pathologie: nom }))
+      } : undefined,
+      
+      antecedents: antecedents && antecedents.length > 0 ? {
+        create: antecedents.map(item => ({
+          antecedent: item.antecedent,
+          description: item.description,
+          specialty: item.specialty,
+          antecedant_date: item.antecedant_date,
+          document1: item.document1,
+          document2: item.document2,
+          document3: item.document3,
+          document4: item.document4,
+          document5: item.document5
         }))
       } : undefined,
-      antecedents: antecedents && antecedents.length > 0 ? {
-        create: antecedents.map(antecedentId => ({
-          antecedent: {
-            connect: { id: antecedentId }
+      
+      assurances: assurances && assurances.length > 0 ? {
+        create: assurances
+      } : undefined,
+      
+      credentials: credentials ? {
+        upsert: {
+          create: {
+            nom_utilisateur: credentials.nom_utilisateur,
+            mot_de_passe: credentials.mot_de_passe
+          },
+          update: {
+            nom_utilisateur: credentials.nom_utilisateur,
+            mot_de_passe: credentials.mot_de_passe
           }
-        }))
+        }
       } : undefined
     },
     include: {
       medecin: true,
-      type_identite: true,
       contacts_urgence: true,
-      documents_patient: {
-        include: {
-          type: true
-        }
-      },
-      allergies: {
-        include: {
-          allergie: true
-        }
-      },
-      pathologies: {
-        include: {
-          pathologie: true
-        }
-      },
-      antecedents: {
-        include: {
-          antecedent: true
-        }
-      }
+      documents_patient: true,
+      allergies: true,
+      pathologies: true,
+      antecedents: true,
+      assurances: true,
+      credentials: true
     }
   }) as unknown as IPatientWithRelations;
 };

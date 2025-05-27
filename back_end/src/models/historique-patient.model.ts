@@ -13,8 +13,12 @@ export interface ICreateHistoriquePatientDto {
   attribut: string;
   ancienne_valeur?: string | null;
   nouvelle_valeur?: string | null;
+  modifie_le?: Date | string;
   modifie_par?: string | null;
 }
+
+// Interface for updating an existing historique patient
+export interface IUpdateHistoriquePatientDto extends Partial<Omit<ICreateHistoriquePatientDto, 'patient_id'>> {}
 
 // Response DTO for historique patient data
 export interface IHistoriquePatientResponseDto {

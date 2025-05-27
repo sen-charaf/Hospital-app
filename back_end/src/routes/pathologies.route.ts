@@ -1,5 +1,5 @@
 import express from 'express';
-import * as pathologieController from '../controllers/pathologie-chronique.controller';
+import * as pathologieController from '../controllers/pathologie.controller';
 
 const router = express.Router();
 

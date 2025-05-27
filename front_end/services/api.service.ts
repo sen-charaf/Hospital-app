@@ -1,69 +1,71 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { handleApiError, logErrorDetails } from '../utils/errors/api-error-handler';
 
-// Base API service for handling HTTP requests
-class ApiService {
-  private api: AxiosInstance;
-  
-  constructor() {
-    this.api = axios.create({
-      baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    
-    
-    this.api.interceptors.request.use(
-      (config) => {
-        const token = localStorage.getItem('token');
-        if (token && config.headers) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-      },
-      (error) => Promise.reject(error)
-    );
-    
-   
-    this.api.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        // Handle common errors (401, 403, etc.)
-        if (error.response?.status === 401) {
-          // Handle unauthorized
-          localStorage.removeItem('token');
-          window.location.href = '/login';
-        }
-        return Promise.reject(error);
-      }
-    );
-  }
-  
-  // Generic GET request
-  public async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const response: AxiosResponse<T> = await this.api.get(url, config);
-    return response.data;
-  }
-  
-  // Generic POST request
-  public async post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
-    const response: AxiosResponse<T> = await this.api.post(url, data, config);
-    return response.data;
-  }
-  
-  // Generic PUT request
-  public async put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
-    const response: AxiosResponse<T> = await this.api.put(url, data, config);
-    return response.data;
-  }
-  
-  // Generic DELETE request
-  public async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const response: AxiosResponse<T> = await this.api.delete(url, config);
-    return response.data;
-  }
-}
+// Create a base API instance
+const apiClient: AxiosInstance = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  timeout: 15000, // 15 seconds
+});
 
-// Create a singleton instance
-const apiService = new ApiService();
-export default apiService;
+// Add request interceptor for auth tokens, etc.
+apiClient.interceptors.request.use(
+  (config) => {
+    // Get token from localStorage or other storage
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Generic API methods with error handling
+export const apiService = {
+  async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+    try {
+      const response: AxiosResponse<T> = await apiClient.get(url, config);
+      return response.data;
+    } catch (error) {
+      const appError = handleApiError(error);
+      logErrorDetails(appError);
+      throw appError;
+    }
+  },
+
+  async post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+    try {
+      const response: AxiosResponse<T> = await apiClient.post(url, data, config);
+      return response.data;
+    } catch (error) {
+      const appError = handleApiError(error);
+      logErrorDetails(appError);
+      throw appError;
+    }
+  },
+
+  async put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+    try {
+      const response: AxiosResponse<T> = await apiClient.put(url, data, config);
+      return response.data;
+    } catch (error) {
+      const appError = handleApiError(error);
+      logErrorDetails(appError);
+      throw appError;
+    }
+  },
+
+  async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+    try {
+      const response: AxiosResponse<T> = await apiClient.delete(url, config);
+      return response.data;
+    } catch (error) {
+      const appError = handleApiError(error);
+      logErrorDetails(appError);
+      throw appError;
+    }
+  },
+};
