@@ -20,7 +20,7 @@ import {
   Eye,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import patientService from "@/services/patient.service";
+import { patientService } from "@/services/patient.service";
 
 // Import step components
 import PersonalInfoStep from "../components/add_patient_steps/personal-info-step";

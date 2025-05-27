@@ -3,7 +3,7 @@ import { ICreatePatientDto, IUpdatePatientDto, IPatient } from '../types/patient
 
 const BASE_URL = '/patients';
 
-export const patientService = {
+export  const  patientService = {
   // Get all patients
   async getAllPatients(): Promise<IPatient[]> {
     return apiService.get<IPatient[]>(BASE_URL);

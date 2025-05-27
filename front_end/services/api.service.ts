@@ -3,7 +3,7 @@ import { handleApiError, logErrorDetails } from '../utils/errors/api-error-handl
 
 // Create a base API instance
 const apiClient: AxiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api',
   headers: {
     'Content-Type': 'application/json',
   },
