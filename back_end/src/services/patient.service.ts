@@ -228,9 +228,12 @@ export const update = async (id: number, data: IUpdatePatientDto): Promise<IPati
   }) as unknown as IPatientWithRelations;
 };
 
+//TODO : khass service dyal update audit 
+
 // Delete patient
 export const remove = async (id: number): Promise<void> => {
   await prisma.patient.delete({
     where: { id }
   });
 };
+

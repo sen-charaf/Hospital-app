@@ -41,7 +41,7 @@ model DocumentParametrage {
 }
 
 model Patient {
-  id                    Int       @id @default(autoincrement())
+  id                  Int            @id @default(autoincrement())
   prenom                String
   nom                   String
   date_naissance        DateTime
@@ -92,6 +92,7 @@ model Patient {
   allergies             PatientAllergie[]
   pathologies           PatientPathologie[]
   antecedents           PatientAntecedentMedical[]
+ 
 }
 
 model ContactUrgence {
@@ -190,3 +191,6 @@ model PatientAntecedentMedical {
 
   @@id([patient_id, antecedent_id])
 }
+
+
+

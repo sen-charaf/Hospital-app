@@ -23,17 +23,17 @@ import { cn } from "@/lib/utils";
 import patientService from "@/services/patient.service";
 
 // Import step components
-import PersonalInfoStep from "../components/add_patient_steps/personal-info-step";
-import ContactAccountStep from "../components/add_patient_steps/contact-account-step";
-import MedicalInfoStep from "../components/add_patient_steps/medical-info-step";
-import AdministrativeInfoStep from "../components/add_patient_steps/administrative-info-step";
-import ContactsDocumentsStep from "../components/add_patient_steps/contacts-documents-step";
-import MedicalConditionsStep from "../components/add_patient_steps/medical-conditions-step";
-import ReviewStep from "../components/add_patient_steps/review-step";
+import PersonalInfoStep from "@/components/add_patient_steps/personal-info-step";
+import ContactAccountStep from "@/components/add_patient_steps/contact-account-step";
+import MedicalInfoStep from "@/components/add_patient_steps/medical-info-step";
+import AdministrativeInfoStep from "@/components/add_patient_steps/administrative-info-step";
+import ContactsDocumentsStep from "@/components/add_patient_steps/contacts-documents-step";
+import MedicalConditionsStep from "@/components/add_patient_steps/medical-conditions-step";
+import ReviewStep from "@/components/add_patient_steps/review-step";
 
 // Import shared components
-import SearchableSelect from "../components/add_patient_shared/searchable-select";
-import MultiSelectSearch from "../components/add_patient_shared/multi-select-search";
+import SearchableSelect from "@/components/add_patient_shared/searchable-select";
+import MultiSelectSearch from "@/components/add_patient_shared/multi-select-search";
 
 // Development mode flag
 const DEV_MODE = true;
