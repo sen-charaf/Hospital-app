@@ -10,7 +10,7 @@ export interface IPatient {
   adresse?: string;
   telephone?: string;
   email?: string;
-  medecin_id?: number;
+  medecinId?: number;
   type_identite_id?: number;
   numero_identite?: string;
   created_at: string;
@@ -28,21 +28,75 @@ export interface IPatient {
 
 // Interface for creating a new patient
 export interface ICreatePatientDto {
-  nom: string;
   prenom: string;
-  date_naissance: string;
+  nom: string;
+  date_naissance: Date;
   sexe: string;
-  adresse?: string;
+  type_identifiant: string;
+  identifiant: string;
+  photo_profil?: string;
+
   telephone?: string;
   email?: string;
-  medecin_id?: number;
-  type_identite_id?: number;
-  numero_identite?: string;
-  contacts_urgence?: ICreateContactUrgenceDto[];
-  documents_patient?: ICreateDocumentPatientDto[];
-  allergies?: number[];
-  pathologies?: number[];
-  antecedents?: number[];
+  adresse?: string;
+
+  groupe_sanguin?: string;
+  niveau_autonomie?: string;
+  taille_cm?: number;
+  poids_kg?: number;
+  statut_tabac?: string;
+  consommation_alcool?: string;
+
+  statuts?: string;
+  service?: string;
+  priorite?: string;
+  dernier_visite?: Date;
+  etat_civil?: string;
+  profession?: string;
+  langue_preferee?: string;
+  consentement?: boolean;
+
+  contacts_urgence?: ContactUrgenceDto[];
+  documents_patient?: DocumentPatientDto[];
+  allergies?: string[];      // e.g., ['Pollen']
+  pathologies?: string[];    // e.g., ['Asthme']
+  antecedents?: AntecedentDto[];
+  assurances?: AssuranceDto[];
+  credentials?: CredentialsDto;
+}
+
+export interface ContactUrgenceDto {
+  nom_complet: string;
+  relation?: string;
+  telephone: string;
+}
+
+export interface DocumentPatientDto {
+  nom_fichier?: string;
+  url?: string;
+  type: string; // should match a value from DocumentParams.nom
+}
+
+export interface AntecedentDto {
+  antecedent: string;
+  antecedant_date?: Date;
+  specialty?: string;
+  description?: string;
+  document1?: string;
+  document2?: string;
+  document3?: string;
+  document4?: string;
+  document5?: string;
+}
+
+export interface AssuranceDto {
+  assurance: string;
+  numero_police: string;
+}
+
+export interface CredentialsDto {
+  nom_utilisateur: string;
+  mot_de_passe: string;
 }
 
 // Interface for updating an existing patient

@@ -36,39 +36,37 @@ import SearchableSelect from "../components/add_patient_shared/searchable-select
 import MultiSelectSearch from "../components/add_patient_shared/multi-select-search";
 
 // Development mode flag
-const DEV_MODE = true;
+const DEV_MODE = false
+
+// Add the MedicalCondition interface at the top after imports:
+interface MedicalCondition {
+  id: string
+  name: string
+  description: string
+  dateAdded: Date
+  notes?: string
+  documents?: File[]
+}
 
 // Validation schema
 const patientSchema = z.object({
   // Personal Information
   prenom: DEV_MODE ? z.string().optional() : z.string().min(1, "Prénom requis"),
   nom: DEV_MODE ? z.string().optional() : z.string().min(1, "Nom requis"),
-  date_naissance: DEV_MODE
-    ? z.date().optional()
-    : z.date({ required_error: "Date de naissance requise" }),
+  date_naissance: DEV_MODE ? z.date().optional() : z.date({ required_error: "Date de naissance requise" }),
   sexe: DEV_MODE ? z.string().optional() : z.string().min(1, "Sexe requis"),
-  type_identite_id: DEV_MODE
-    ? z.string().optional()
-    : z.string().min(1, "Type d'identité requis"),
-  identifiant: DEV_MODE
-    ? z.string().optional()
-    : z.string().min(1, "Identifiant requis"),
+  type_identite_id: DEV_MODE ? z.string().optional() : z.string().min(1, "Type d'identité requis"),
+  identifiant: DEV_MODE ? z.string().optional() : z.string().min(1, "Identifiant requis"),
   photo_profil: z.string().optional(),
 
   // Contact Information
-  telephone: DEV_MODE
-    ? z.string().optional()
-    : z.string().min(1, "Téléphone requis"),
+  telephone: DEV_MODE ? z.string().optional() : z.string().min(1, "Téléphone requis"),
   email: DEV_MODE ? z.string().optional() : z.string().email("Email invalide"),
   adresse: z.string().optional(),
 
   // Account
-  nom_utilisateur: DEV_MODE
-    ? z.string().optional()
-    : z.string().min(3, "Nom d'utilisateur requis (min 3 caractères)"),
-  mot_de_passe: DEV_MODE
-    ? z.string().optional()
-    : z.string().min(6, "Mot de passe requis (min 6 caractères)"),
+  nom_utilisateur: DEV_MODE ? z.string().optional() : z.string().min(3, "Nom d'utilisateur requis (min 3 caractères)"),
+  mot_de_passe: DEV_MODE ? z.string().optional() : z.string().min(6, "Mot de passe requis (min 6 caractères)"),
 
   // Medical Information
   groupe_sanguin: z.string().optional(),
@@ -82,7 +80,7 @@ const patientSchema = z.object({
   assurance: z.string().optional(),
   numero_police: z.string().optional(),
   numero_dossier: z.string().optional(),
-  medecin_id: z.string().optional(),
+  medecinId: z.string().optional(),
   statuts: z.string().optional(),
   service: z.string().optional(),
   priorite: z.string().optional(),
@@ -95,7 +93,7 @@ const patientSchema = z.object({
         nom_complet: z.string().min(1, "Nom complet requis"),
         relation: z.string().min(1, "Relation requise"),
         telephone: z.string().min(1, "Téléphone requis"),
-      })
+      }),
     )
     .optional(),
 
@@ -105,7 +103,7 @@ const patientSchema = z.object({
         document_parametrage_id: z.string().min(1, "Type de document requis"),
         nom_fichier: z.string().min(1, "Nom de fichier requis"),
         url: z.string().url("URL invalide"),
-      })
+      }),
     )
     .optional(),
 
@@ -113,9 +111,9 @@ const patientSchema = z.object({
   allergies: z.array(z.string()).optional(),
   pathologies: z.array(z.string()).optional(),
   antecedents: z.array(z.string()).optional(),
-});
+})
 
-type PatientFormData = z.infer<typeof patientSchema>;
+type PatientFormData = z.infer<typeof patientSchema>
 
 // Stepper steps
 const steps = [
@@ -126,28 +124,25 @@ const steps = [
   { id: 5, title: "Contacts & Documents", icon: AlertTriangle },
   { id: 6, title: "Conditions médicales", icon: Heart },
   { id: 7, title: "Révision & Envoi", icon: Eye },
-];
+]
 
 export default function PatientForm() {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [selectedAllergies, setSelectedAllergies] = useState<string[]>([]);
-  const [selectedPathologies, setSelectedPathologies] = useState<string[]>([]);
-  const [selectedAntecedents, setSelectedAntecedents] = useState<string[]>([]);
-  const [selectedMedecin, setSelectedMedecin] = useState<string>("");
-  const [selectedStatus, setSelectedStatus] = useState<string>("");
-  const [selectedService, setSelectedService] = useState<string>("");
-  const [selectedPriority, setSelectedPriority] = useState<string>("");
-  const [consentAccepted, setConsentAccepted] = useState<boolean>(false);
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [selectedTabacStatus, setSelectedTabacStatus] = useState<string>("");
-  const [selectedAlcoolConsommation, setSelectedAlcoolConsommation] =
-    useState<string>("");
-  const [documentFiles, setDocumentFiles] = useState<{
-    [key: number]: File | null;
-  }>({});
-  const [documentUploadMode, setDocumentUploadMode] = useState<{
-    [key: number]: "file" | "url";
-  }>({});
+  const [currentStep, setCurrentStep] = useState(1)
+  // Replace the medical condition state declarations with:
+  const [selectedAllergies, setSelectedAllergies] = useState<MedicalCondition[]>([])
+  const [selectedPathologies, setSelectedPathologies] = useState<MedicalCondition[]>([])
+  const [selectedAntecedents, setSelectedAntecedents] = useState<MedicalCondition[]>([])
+  const [selectedMedecin, setSelectedMedecin] = useState<string>("")
+  const [selectedStatus, setSelectedStatus] = useState<string>("")
+  const [selectedService, setSelectedService] = useState<string>("")
+  const [selectedPriority, setSelectedPriority] = useState<string>("")
+  const [consentAccepted, setConsentAccepted] = useState<boolean>(false)
+  const [showPassword, setShowPassword] = useState<boolean>(false)
+  const [selectedTabacStatus, setSelectedTabacStatus] = useState<string>("")
+  const [selectedAlcoolConsommation, setSelectedAlcoolConsommation] = useState<string>("")
+  const [documentFiles, setDocumentFiles] = useState<{ [key: number]: File | null }>({})
+  const [documentUploadMode, setDocumentUploadMode] = useState<{ [key: number]: "file" | "url" }>({})
+  const [insurances, setInsurances] = useState<Array<{ id: string; name: string; policyNumber: string }>>([])
 
   const form = useForm<PatientFormData>({
     resolver: zodResolver(patientSchema),
@@ -158,7 +153,7 @@ export default function PatientForm() {
       pathologies: [],
       antecedents: [],
     },
-  });
+  })
 
   const {
     fields: emergencyFields,
@@ -167,7 +162,7 @@ export default function PatientForm() {
   } = useFieldArray({
     control: form.control,
     name: "emergency_contacts",
-  });
+  })
 
   const {
     fields: documentFields,
@@ -176,90 +171,149 @@ export default function PatientForm() {
   } = useFieldArray({
     control: form.control,
     name: "documents",
-  });
+  })
 
   const generateCredentials = () => {
-    const randomUsername = `user_${Math.random().toString(36).substring(2, 8)}`;
-    const randomPassword = Math.random().toString(36).substring(2, 10);
+    const randomUsername = `user_${Math.random().toString(36).substring(2, 8)}`
+    const randomPassword = Math.random().toString(36).substring(2, 10)
 
-    form.setValue("nom_utilisateur", randomUsername);
-    form.setValue("mot_de_passe", randomPassword);
-  };
+    form.setValue("nom_utilisateur", randomUsername)
+    form.setValue("mot_de_passe", randomPassword)
+  }
 
   const nextStep = () => {
     if (currentStep < steps.length) {
-      setCurrentStep(currentStep + 1);
+      setCurrentStep(currentStep + 1)
     }
-  };
+  }
 
   const prevStep = () => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+      setCurrentStep(currentStep - 1)
     }
-  };
+  }
 
   const handleFileUpload = (index: number, file: File | null) => {
-    setDocumentFiles((prev) => ({ ...prev, [index]: file }));
+    setDocumentFiles((prev) => ({ ...prev, [index]: file }))
     if (file) {
-      form.setValue(`documents.${index}.nom_fichier`, file.name);
-      form.setValue(`documents.${index}.url`, URL.createObjectURL(file));
+      form.setValue(`documents.${index}.nom_fichier`, file.name)
+      form.setValue(`documents.${index}.url`, URL.createObjectURL(file))
     }
-  };
+  }
 
   const toggleUploadMode = (index: number) => {
-    const currentMode = documentUploadMode[index] || "url";
-    const newMode = currentMode === "url" ? "file" : "url";
-    setDocumentUploadMode((prev) => ({ ...prev, [index]: newMode }));
+    const currentMode = documentUploadMode[index] || "url"
+    const newMode = currentMode === "url" ? "file" : "url"
+    setDocumentUploadMode((prev) => ({ ...prev, [index]: newMode }))
 
     // Clear the fields when switching modes
     if (newMode === "file") {
-      form.setValue(`documents.${index}.url`, "");
+      form.setValue(`documents.${index}.url`, "")
     } else {
-      setDocumentFiles((prev) => ({ ...prev, [index]: null }));
-      form.setValue(`documents.${index}.nom_fichier`, "");
+      setDocumentFiles((prev) => ({ ...prev, [index]: null }))
+      form.setValue(`documents.${index}.nom_fichier`, "")
     }
-  };
+  }
 
   const onSubmit = async (data: PatientFormData) => {
-    // Update medical conditions from state
+    // Format the data to match the backend DTO structure
     const finalData = {
-      ...data,
-      allergies: selectedAllergies,
-      pathologies: selectedPathologies,
-      antecedents: selectedAntecedents,
-    };
+      // Basic Info
+      prenom: data.prenom || "",
+      nom: data.nom || "",
+      date_naissance: data.date_naissance || new Date(),
+      sexe: data.sexe || "",
+      type_identifiant: data.type_identite_id || "",
+      identifiant: data.identifiant || "",
+      photo_profil: data.photo_profil || undefined, // Changed null to undefined
+      
+      // Contact information
+      telephone: data.telephone || "",
+      email: data.email || "",
+      adresse: data.adresse || undefined, // Changed null to undefined
+      
+      // Medical information
+      groupe_sanguin: data.groupe_sanguin || undefined,
+      niveau_autonomie: data.niveau_autonomie || undefined,
+      taille_cm: data.taille_cm || undefined,
+      poids_kg: data.poids_kg || undefined,
+      statut_tabac: selectedTabacStatus || undefined,
+      consommation_alcool: selectedAlcoolConsommation || undefined,
+      
+      // Administrative information
+      medecinId: selectedMedecin ? parseInt(selectedMedecin) : undefined,
+      statuts: selectedStatus || undefined,
+      service: selectedService || undefined,
+      priorite: selectedPriority || undefined,
+      dernier_visite: data.dernier_visite || undefined,
+      
+      // Credentials
+      credentials: {
+        nom_utilisateur: data.nom_utilisateur || "",
+        mot_de_passe: data.mot_de_passe || ""
+      },
+      
+      // Related entities
+      contacts_urgence: data.emergency_contacts?.map(contact => ({
+        nom_complet: contact.nom_complet || "",
+        relation: contact.relation || "",
+        telephone: contact.telephone || ""
+      })) || [],
+      
+      documents_patient: data.documents?.map(doc => ({
+        nom_fichier: doc.nom_fichier || "",
+        url: doc.url || "",
+        type: doc.document_parametrage_id || ""
+      })) || [],
+      
+      allergies: selectedAllergies.map(a => a.name),
+      pathologies: selectedPathologies.map(p => p.name),
+      
+      antecedents: selectedAntecedents.map(a => ({
+        antecedent: a.name,
+        description: a.description || undefined,
+        specialty: undefined,
+        antecedant_date: a.dateAdded
+      })),
+      
+      assurances: data.assurance && data.numero_police ? [{
+        assurance: data.assurance,
+        numero_police: data.numero_police
+      }] : []
+    }
 
     try {
       // Use patientService instead of direct fetch
-      const response = await patientService.createPatient(finalData as any);
-      console.log("Patient created:", response);
+      const response = await patientService.createPatient(finalData);
       
-      alert("Patient créé avec succès!");
-      form.reset();
-      setCurrentStep(1);
-      setSelectedAllergies([]);
-      setSelectedPathologies([]);
-      setSelectedAntecedents([]);
-      setSelectedMedecin("");
-      setSelectedStatus("");
-      setSelectedService("");
-      setSelectedPriority("");
-      setConsentAccepted(false);
-      setShowPassword(false);
-      setSelectedTabacStatus("");
-      setSelectedAlcoolConsommation("");
-      setDocumentFiles({});
-      setDocumentUploadMode({});
+      alert("Patient créé avec succès!")
+      // Reset form and state as before
+      form.reset()
+      setCurrentStep(1)
+      setSelectedAllergies([])
+      setSelectedPathologies([])
+      setSelectedAntecedents([])
+      setSelectedMedecin("")
+      setSelectedStatus("")
+      setSelectedService("")
+      setSelectedPriority("")
+      setConsentAccepted(false)
+      setShowPassword(false)
+      setSelectedTabacStatus("")
+      setSelectedAlcoolConsommation("")
+      setDocumentFiles({})
+      setDocumentUploadMode({})
+      setInsurances([])
     } catch (error) {
-      console.error("Erreur:", error);
-      alert("Erreur lors de la création du patient");
+      console.error("Erreur:", error)
+      alert("Erreur lors de la création du patient")
     }
-  };
+  }
 
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
-        return <PersonalInfoStep form={form} />;
+        return <PersonalInfoStep form={form} />
 
       case 2:
         return (
@@ -269,7 +323,7 @@ export default function PatientForm() {
             setShowPassword={setShowPassword}
             generateCredentials={generateCredentials}
           />
-        );
+        )
 
       case 3:
         return (
@@ -281,7 +335,7 @@ export default function PatientForm() {
             setSelectedAlcoolConsommation={setSelectedAlcoolConsommation}
             SearchableSelect={SearchableSelect}
           />
-        );
+        )
 
       case 4:
         return (
@@ -296,8 +350,10 @@ export default function PatientForm() {
             selectedPriority={selectedPriority}
             setSelectedPriority={setSelectedPriority}
             SearchableSelect={SearchableSelect}
+            insurances={insurances}
+            setInsurances={setInsurances}
           />
-        );
+        )
 
       case 5:
         return (
@@ -314,7 +370,7 @@ export default function PatientForm() {
             handleFileUpload={handleFileUpload}
             toggleUploadMode={toggleUploadMode}
           />
-        );
+        )
 
       case 6:
         return (
@@ -327,7 +383,7 @@ export default function PatientForm() {
             setSelectedAntecedents={setSelectedAntecedents}
             MultiSelectSearch={MultiSelectSearch}
           />
-        );
+        )
 
       case 7:
         return (
@@ -344,29 +400,23 @@ export default function PatientForm() {
             selectedAlcoolConsommation={selectedAlcoolConsommation}
             consentAccepted={consentAccepted}
             setConsentAccepted={setConsentAccepted}
+            insurances={insurances}
           />
-        );
+        )
 
       default:
-        return null;
+        return null
     }
-  };
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-4">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-blue-900 mb-2">
-            Création d'un nouveau patient
-          </h1>
-          <p className="text-blue-600">
-            Suivez les étapes pour compléter le dossier patient
-          </p>
+          <h1 className="text-3xl font-bold text-blue-900 mb-2">Création d'un nouveau patient</h1>
+          <p className="text-blue-600">Suivez les étapes pour compléter le dossier patient</p>
           {DEV_MODE && (
-            <Badge
-              variant="outline"
-              className="mt-2 border-orange-500 text-orange-600"
-            >
+            <Badge variant="outline" className="mt-2 border-orange-500 text-orange-600">
               Mode développement - Validation désactivée
             </Badge>
           )}
@@ -383,22 +433,16 @@ export default function PatientForm() {
                     currentStep === step.id
                       ? "bg-blue-600 text-white border-blue-600"
                       : currentStep > step.id
-                      ? "bg-blue-100 text-blue-600 border-blue-600"
-                      : "bg-gray-100 text-gray-400 border-gray-300"
+                        ? "bg-blue-100 text-blue-600 border-blue-600"
+                        : "bg-gray-100 text-gray-400 border-gray-300",
                   )}
                 >
-                  {currentStep > step.id ? (
-                    <Check className="h-5 w-5" />
-                  ) : (
-                    <step.icon className="h-5 w-5" />
-                  )}
+                  {currentStep > step.id ? <Check className="h-5 w-5" /> : <step.icon className="h-5 w-5" />}
                 </div>
                 <span
                   className={cn(
                     "text-xs mt-2 text-center max-w-20",
-                    currentStep === step.id
-                      ? "text-blue-600 font-medium"
-                      : "text-gray-500"
+                    currentStep === step.id ? "text-blue-600 font-medium" : "text-gray-500",
                   )}
                 >
                   {step.title}
@@ -419,9 +463,7 @@ export default function PatientForm() {
           <Card className="border-blue-200 min-h-96">
             <CardHeader className="bg-blue-50">
               <CardTitle className="flex items-center gap-2 text-blue-900">
-                {React.createElement(steps[currentStep - 1].icon, {
-                  className: "h-5 w-5",
-                })}
+                {React.createElement(steps[currentStep - 1].icon, { className: "h-5 w-5" })}
                 {steps[currentStep - 1].title}
               </CardTitle>
             </CardHeader>
@@ -447,16 +489,10 @@ export default function PatientForm() {
                 className="bg-blue-600 hover:bg-blue-700 text-white px-8"
                 disabled={form.formState.isSubmitting || !consentAccepted}
               >
-                {form.formState.isSubmitting
-                  ? "Création en cours..."
-                  : "Créer le patient"}
+                {form.formState.isSubmitting ? "Création en cours..." : "Créer le patient"}
               </Button>
             ) : (
-              <Button
-                type="button"
-                onClick={nextStep}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
+              <Button type="button" onClick={nextStep} className="bg-blue-600 hover:bg-blue-700 text-white">
                 Suivant
                 <ChevronRight className="h-4 w-4 ml-2" />
               </Button>
@@ -465,5 +501,5 @@ export default function PatientForm() {
         </form>
       </div>
     </div>
-  );
+  )
 }

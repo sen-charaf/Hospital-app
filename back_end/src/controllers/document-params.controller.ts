@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
-import * as documentParametrageService from '../services/document-parametrage.service';
+import * as documentParamsService from '../services/document-params.service';
 
 // Get all document parametrages
-export const getAllDocumentParametrages = async (req: Request, res: Response) => {
+export const getAllDocumentParams = async (req: Request, res: Response) => {
   try {
-    const documentParametrages = await documentParametrageService.findAll();
-    res.json(documentParametrages);
+    const documentParamss = await documentParamsService.findAll();
+    res.json(documentParamss);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
     res.status(500).json({ error: errorMessage });
@@ -13,17 +13,17 @@ export const getAllDocumentParametrages = async (req: Request, res: Response) =>
 };
 
 // Get document parametrage by ID
-export const getDocumentParametrageById = async (req: Request, res: Response) => {
+export const getDocumentParamsById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const documentParametrage = await documentParametrageService.findById(Number(id));
+    const documentParams = await documentParamsService.findById(Number(id));
     
-    if (!documentParametrage) {
+    if (!documentParams) {
       res.status(404).json({ error: 'Type de document non trouvé' });
       return;
     }
     
-    res.json(documentParametrage);
+    res.json(documentParams);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
     res.status(500).json({ error: errorMessage });
@@ -31,10 +31,10 @@ export const getDocumentParametrageById = async (req: Request, res: Response) =>
 };
 
 // Create new document parametrage
-export const createDocumentParametrage = async (req: Request, res: Response) => {
+export const createDocumentParams = async (req: Request, res: Response) => {
   try {
-    const documentParametrage = await documentParametrageService.create(req.body);
-    res.status(201).json(documentParametrage);
+    const documentParams = await documentParamsService.create(req.body);
+    res.status(201).json(documentParams);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
     res.status(400).json({ error: errorMessage });
@@ -42,11 +42,11 @@ export const createDocumentParametrage = async (req: Request, res: Response) => 
 };
 
 // Update document parametrage
-export const updateDocumentParametrage = async (req: Request, res: Response) => {
+export const updateDocumentParams = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const documentParametrage = await documentParametrageService.update(Number(id), req.body);
-    res.json(documentParametrage);
+    const documentParams = await documentParamsService.update(Number(id), req.body);
+    res.json(documentParams);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
     res.status(400).json({ error: errorMessage });
@@ -54,10 +54,10 @@ export const updateDocumentParametrage = async (req: Request, res: Response) => 
 };
 
 // Delete document parametrage
-export const deleteDocumentParametrage = async (req: Request, res: Response) => {
+export const deleteDocumentParams = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    await documentParametrageService.remove(Number(id));
+    await documentParamsService.remove(Number(id));
     res.status(204).send();
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
