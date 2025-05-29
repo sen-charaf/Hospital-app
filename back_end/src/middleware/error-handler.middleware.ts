@@ -1,20 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import { AppError, ErrorType } from '../utils/app-error';
 import { Prisma } from '@prisma/client';
+import { logger } from '../utils/logger';
 
-// Log error details to console
+// Log error details using the logger
 const logError = (err: Error): void => {
-  console.error('\x1b[31m%s\x1b[0m', '[ERROR]', new Date().toISOString());
-  console.error('Message:', err.message);
-  console.error('Stack:', err.stack);
-  
-  if (err instanceof AppError) {
-    console.error('Type:', err.type);
-    console.error('Status Code:', err.statusCode);
-    console.error('Is Operational:', err.isOperational);
-  }
-  
-  console.error('\n');
+  logger.logError(err);
 };
 
 // Handle Prisma-specific errors

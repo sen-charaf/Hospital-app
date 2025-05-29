@@ -1,0 +1,25 @@
+
+[ERROR] 2025-05-28T15:10:15.453Z
+Message: 
+Invalid `prisma.patient.create()` invocation in
+C:\Users\user\OneDrive\Desktop\medical app\back_end\src\services\patient.service.ts:48:25
+
+  45   ...patientData 
+  46 } = data;
+  47 
+→ 48 return prisma.patient.create(
+Unique constraint failed on the fields: (`nom_utilisateur`)
+Stack: PrismaClientKnownRequestError: 
+Invalid `prisma.patient.create()` invocation in
+C:\Users\user\OneDrive\Desktop\medical app\back_end\src\services\patient.service.ts:48:25
+
+  45   ...patientData 
+  46 } = data;
+  47 
+→ 48 return prisma.patient.create(
+Unique constraint failed on the fields: (`nom_utilisateur`)
+    at Zn.handleRequestError (C:\Users\user\OneDrive\Desktop\medical app\back_end\node_modules\@prisma\client\runtime\library.js:121:7459)
+    at Zn.handleAndLogRequestError (C:\Users\user\OneDrive\Desktop\medical app\back_end\node_modules\@prisma\client\runtime\library.js:121:6784)
+    at Zn.request (C:\Users\user\OneDrive\Desktop\medical app\back_end\node_modules\@prisma\client\runtime\library.js:121:6491)
+    at async l (C:\Users\user\OneDrive\Desktop\medical app\back_end\node_modules\@prisma\client\runtime\library.js:130:9778)
+

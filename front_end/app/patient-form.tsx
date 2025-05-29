@@ -8,27 +8,19 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Check,
-  User,
-  Phone,
-  Heart,
-  FileText,
-  AlertTriangle,
-  Eye,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Check, User, Phone, FileText, Heart, FolderOpen, Eye } from 'lucide-react'
 import { cn } from "@/lib/utils";
 import { patientService } from "@/services/patient.service";
 
 // Import step components
 import PersonalInfoStep from "../components/add_patient_steps/personal-info-step";
-import ContactAccountStep from "../components/add_patient_steps/contact-account-step";
-import MedicalInfoStep from "../components/add_patient_steps/medical-info-step";
+import ContactEmergencyStep from "../components/add_patient_steps/contact-emergency-step"
+// import ContactAccountStep from "../components/add_patient_steps/contact-account-step";
+// import MedicalInfoStep from "../components/add_patient_steps/medical-info-step";
 import AdministrativeInfoStep from "../components/add_patient_steps/administrative-info-step";
-import ContactsDocumentsStep from "../components/add_patient_steps/contacts-documents-step";
+// import ContactsDocumentsStep from "../components/add_patient_steps/contacts-documents-step";
 import MedicalConditionsStep from "../components/add_patient_steps/medical-conditions-step";
+import DocumentsStep from "../components/add_patient_steps/documents-step"
 import ReviewStep from "../components/add_patient_steps/review-step";
 
 // Import shared components
@@ -36,7 +28,8 @@ import SearchableSelect from "../components/add_patient_shared/searchable-select
 import MultiSelectSearch from "../components/add_patient_shared/multi-select-search";
 
 // Development mode flag
-const DEV_MODE = false
+// Set this to true for testing
+const DEV_MODE = true
 
 // Add the MedicalCondition interface at the top after imports:
 interface MedicalCondition {
@@ -55,6 +48,9 @@ const patientSchema = z.object({
   nom: DEV_MODE ? z.string().optional() : z.string().min(1, "Nom requis"),
   date_naissance: DEV_MODE ? z.date().optional() : z.date({ required_error: "Date de naissance requise" }),
   sexe: DEV_MODE ? z.string().optional() : z.string().min(1, "Sexe requis"),
+  etat_civil: z.string().optional(),
+  profession: z.string().optional(),
+  langue_preferee: z.string().optional(),
   type_identite_id: DEV_MODE ? z.string().optional() : z.string().min(1, "Type d'identité requis"),
   identifiant: DEV_MODE ? z.string().optional() : z.string().min(1, "Identifiant requis"),
   photo_profil: z.string().optional(),
@@ -115,15 +111,13 @@ const patientSchema = z.object({
 
 type PatientFormData = z.infer<typeof patientSchema>
 
-// Stepper steps
 const steps = [
   { id: 1, title: "Informations personnelles", icon: User },
-  { id: 2, title: "Contact & Compte", icon: Phone },
-  { id: 3, title: "Informations médicales", icon: Heart },
-  { id: 4, title: "Informations administratives", icon: FileText },
-  { id: 5, title: "Contacts & Documents", icon: AlertTriangle },
-  { id: 6, title: "Conditions médicales", icon: Heart },
-  { id: 7, title: "Révision & Envoi", icon: Eye },
+  { id: 2, title: "Contact & Urgence", icon: Phone },
+  { id: 3, title: "Informations administratives", icon: FileText },
+  { id: 4, title: "Médical & Conditions", icon: Heart },
+  { id: 5, title: "Documents", icon: FolderOpen },
+  { id: 6, title: "Révision & Envoi", icon: Eye },
 ]
 
 export default function PatientForm() {
@@ -143,15 +137,72 @@ export default function PatientForm() {
   const [documentFiles, setDocumentFiles] = useState<{ [key: number]: File | null }>({})
   const [documentUploadMode, setDocumentUploadMode] = useState<{ [key: number]: "file" | "url" }>({})
   const [insurances, setInsurances] = useState<Array<{ id: string; name: string; policyNumber: string }>>([])
+  const [profileImage, setProfileImage] = useState<File | null>(null)
 
   const form = useForm<PatientFormData>({
     resolver: zodResolver(patientSchema),
     defaultValues: {
-      emergency_contacts: [{ nom_complet: "", relation: "", telephone: "" }],
-      documents: [{ document_parametrage_id: "", nom_fichier: "", url: "" }],
-      allergies: [],
-      pathologies: [],
-      antecedents: [],
+      // Personal Information
+      prenom: "John",
+      nom: "Doe",
+      date_naissance: new Date("1990-01-01"),
+      sexe: "M",
+      etat_civil: "Célibataire",
+      profession: "Ingénieur",
+      langue_preferee: "Français",
+      type_identite_id: "1",
+      identifiant: "ID123456",
+      photo_profil: "",
+
+      // Contact Information
+      telephone: "+33123456789",
+      email: "john.doe@example.com",
+      adresse: "123 Rue de la Paix, Paris",
+
+      // Account
+      nom_utilisateur: "johndoe",
+      mot_de_passe: "password123",
+
+      // Medical Information
+      groupe_sanguin: "A+",
+      niveau_autonomie: "Autonome",
+      taille_cm: 175,
+      poids_kg: 70,
+      statut_tabac: "Non-fumeur",
+      consommation_alcool: "Occasionnel",
+
+      // Administrative Information
+      assurance: "AXA",
+      numero_police: "POL123456",
+      numero_dossier: "DOS789",
+      medecinId: "1",
+      statuts: "Actif",
+      service: "Médecine générale",
+      priorite: "Normal",
+      dernier_visite: new Date("2023-12-01"),
+
+      // Emergency Contacts
+      emergency_contacts: [
+        {
+          nom_complet: "Jane Doe",
+          relation: "Épouse",
+          telephone: "+33987654321"
+        }
+      ],
+
+      // Documents
+      documents: [
+        {
+          document_parametrage_id: "1",
+          nom_fichier: "carte_vitale.pdf",
+          url: "https://example.com/documents/carte_vitale.pdf"
+        }
+      ],
+
+      // Medical conditions
+      allergies: ["Pénicilline", "Pollen"],
+      pathologies: ["Asthme", "Hypertension"],
+      antecedents: ["Appendicectomie", "Fracture du bras"]
     },
   })
 
@@ -216,6 +267,13 @@ export default function PatientForm() {
   }
 
   const onSubmit = async (data: PatientFormData) => {
+    // Create FormData for file uploads
+    const formData = new FormData()
+
+    // Add profile image if exists
+    if (profileImage) {
+      formData.append("profileImage", profileImage)
+    }
     // Format the data to match the backend DTO structure
     const finalData = {
       // Basic Info
@@ -282,9 +340,35 @@ export default function PatientForm() {
       }] : []
     }
 
+     // Add JSON data to FormData
+     formData.append("patientData", JSON.stringify(finalData))
+
+     // Add document files
+     Object.entries(documentFiles).forEach(([index, file]) => {
+       if (file) {
+         formData.append(`document_${index}`, file)
+       }
+     })
+ 
+
     try {
-      // Use patientService instead of direct fetch
+      // Create the patient data first
       const response = await patientService.createPatient(finalData);
+      
+      // If you need to upload files separately, create a new method for that
+      if (Object.entries(documentFiles).length > 0) {
+        const formData = new FormData();
+        formData.append("patientId", response.id.toString());
+        
+        Object.entries(documentFiles).forEach(([index, file]) => {
+          if (file) {
+            formData.append(`document_${index}`, file);
+          }
+        });
+        
+        // Create a new method in patientService for uploading documents
+        await patientService.uploadPatientDocuments(response.id, formData);
+      }
       
       alert("Patient créé avec succès!")
       // Reset form and state as before
@@ -304,6 +388,7 @@ export default function PatientForm() {
       setDocumentFiles({})
       setDocumentUploadMode({})
       setInsurances([])
+      setProfileImage(null)
     } catch (error) {
       console.error("Erreur:", error)
       alert("Erreur lors de la création du patient")
@@ -313,31 +398,22 @@ export default function PatientForm() {
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
-        return <PersonalInfoStep form={form} />
+        return <PersonalInfoStep form={form} profileImage={profileImage} setProfileImage={setProfileImage} />
 
       case 2:
         return (
-          <ContactAccountStep
+          <ContactEmergencyStep
             form={form}
             showPassword={showPassword}
             setShowPassword={setShowPassword}
             generateCredentials={generateCredentials}
+            emergencyFields={emergencyFields}
+            appendEmergency={appendEmergency}
+            removeEmergency={removeEmergency}
           />
         )
 
       case 3:
-        return (
-          <MedicalInfoStep
-            form={form}
-            selectedTabacStatus={selectedTabacStatus}
-            setSelectedTabacStatus={setSelectedTabacStatus}
-            selectedAlcoolConsommation={selectedAlcoolConsommation}
-            setSelectedAlcoolConsommation={setSelectedAlcoolConsommation}
-            SearchableSelect={SearchableSelect}
-          />
-        )
-
-      case 4:
         return (
           <AdministrativeInfoStep
             form={form}
@@ -355,13 +431,29 @@ export default function PatientForm() {
           />
         )
 
+        case 4:
+          return (
+            <MedicalConditionsStep
+              form={form}
+              selectedTabacStatus={selectedTabacStatus}
+              setSelectedTabacStatus={setSelectedTabacStatus}
+              selectedAlcoolConsommation={selectedAlcoolConsommation}
+              setSelectedAlcoolConsommation={setSelectedAlcoolConsommation}
+              selectedAllergies={selectedAllergies}
+              setSelectedAllergies={setSelectedAllergies}
+              selectedPathologies={selectedPathologies}
+              setSelectedPathologies={setSelectedPathologies}
+              selectedAntecedents={selectedAntecedents}
+              setSelectedAntecedents={setSelectedAntecedents}
+              SearchableSelect={SearchableSelect}
+              MultiSelectSearch={MultiSelectSearch}
+            />
+          )
+
       case 5:
         return (
-          <ContactsDocumentsStep
+          <DocumentsStep
             form={form}
-            emergencyFields={emergencyFields}
-            appendEmergency={appendEmergency}
-            removeEmergency={removeEmergency}
             documentFields={documentFields}
             appendDocument={appendDocument}
             removeDocument={removeDocument}
@@ -373,19 +465,6 @@ export default function PatientForm() {
         )
 
       case 6:
-        return (
-          <MedicalConditionsStep
-            selectedAllergies={selectedAllergies}
-            setSelectedAllergies={setSelectedAllergies}
-            selectedPathologies={selectedPathologies}
-            setSelectedPathologies={setSelectedPathologies}
-            selectedAntecedents={selectedAntecedents}
-            setSelectedAntecedents={setSelectedAntecedents}
-            MultiSelectSearch={MultiSelectSearch}
-          />
-        )
-
-      case 7:
         return (
           <ReviewStep
             form={form}
@@ -401,6 +480,7 @@ export default function PatientForm() {
             consentAccepted={consentAccepted}
             setConsentAccepted={setConsentAccepted}
             insurances={insurances}
+            profileImage={profileImage}
           />
         )
 

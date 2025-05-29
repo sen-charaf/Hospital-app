@@ -28,4 +28,13 @@ export  const  patientService = {
   async deletePatient(id: number): Promise<void> {
     return apiService.delete<void>(`${BASE_URL}/${id}`);
   },
+  
+  // Add this method to your patientService
+  async uploadPatientDocuments(patientId: number, formData: FormData): Promise<void> {
+    return apiService.post<void>(`${BASE_URL}/${patientId}/documents`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  }
 };

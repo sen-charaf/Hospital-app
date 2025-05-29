@@ -32,9 +32,6 @@ model Patient {
   email     String?
   adresse   String?
 
-  nom_utilisateur String? @unique
-  mot_de_passe    String?
-
   groupe_sanguin      String?
   niveau_autonomie    String?
   taille_cm           Int?

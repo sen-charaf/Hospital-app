@@ -29,40 +29,30 @@ interface ReviewStepProps {
   consentAccepted: boolean
   setConsentAccepted: (accepted: boolean) => void
   insurances: Array<{ id: string; name: string; policyNumber: string }>
+  profileImage: File | null
 }
 
-const allergiesList = [
-  { id: "1", name: "Pénicilline" },
-  { id: "2", name: "Arachides" },
-  { id: "3", name: "Lactose" },
-  { id: "4", name: "Pollen" },
-  { id: "5", name: "Fruits de mer" },
-  { id: "6", name: "Œufs" },
-  { id: "7", name: "Soja" },
-  { id: "8", name: "Gluten" },
+const etatCivilOptions = [
+  { id: "celibataire", name: "Célibataire" },
+  { id: "marie", name: "Marié(e)" },
+  { id: "divorce", name: "Divorcé(e)" },
+  { id: "veuf", name: "Veuf/Veuve" },
+  { id: "separe", name: "Séparé(e)" },
+  { id: "concubinage", name: "Concubinage" },
+  { id: "pacs", name: "PACS" },
 ]
 
-const pathologiesList = [
-  { id: "1", name: "Diabète" },
-  { id: "2", name: "Hypertension" },
-  { id: "3", name: "Asthme" },
-  { id: "4", name: "Arthrite" },
-  { id: "5", name: "Insuffisance cardiaque" },
-  { id: "6", name: "Dépression" },
-  { id: "7", name: "Migraine" },
-  { id: "8", name: "Épilepsie" },
+const langueOptions = [
+  { id: "francais", name: "Français" },
+  { id: "arabe", name: "Arabe" },
+  { id: "amazigh", name: "Amazigh" },
+  { id: "anglais", name: "Anglais" },
+  { id: "espagnol", name: "Espagnol" },
+  { id: "allemand", name: "Allemand" },
+  { id: "italien", name: "Italien" },
 ]
 
-const antecedentsList = [
-  { id: "1", name: "Chirurgie cardiaque" },
-  { id: "2", name: "Fracture" },
-  { id: "3", name: "Cancer" },
-  { id: "4", name: "Accident vasculaire" },
-  { id: "5", name: "Transplantation" },
-  { id: "6", name: "Intervention chirurgicale" },
-  { id: "7", name: "Hospitalisation" },
-  { id: "8", name: "Traumatisme" },
-]
+
 
 const doctors = [
   { id: "1", name: "Dr. Martin Dubois" },
@@ -124,6 +114,7 @@ export default function ReviewStep({
   consentAccepted,
   setConsentAccepted,
   insurances,
+  profileImage
 }: ReviewStepProps) {
   return (
     <div className="space-y-6">
@@ -135,6 +126,15 @@ export default function ReviewStep({
             <CardTitle className="text-sm text-blue-900">Informations personnelles</CardTitle>
           </CardHeader>
           <CardContent className="p-4 space-y-2 text-sm">
+          {profileImage && (
+              <div className="mb-3">
+                <img
+                  src={URL.createObjectURL(profileImage) || "/placeholder.svg"}
+                  alt="Photo de profil"
+                  className="w-16 h-16 object-cover rounded-lg border-2 border-blue-200"
+                />
+              </div>
+            )}
             <div>
               <strong>Nom:</strong> {form.watch("nom") || "Non renseigné"}
             </div>
@@ -147,6 +147,17 @@ export default function ReviewStep({
             </div>
             <div>
               <strong>Sexe:</strong> {form.watch("sexe") || "Non renseigné"}
+            </div>
+            <div>
+              <strong>État civil:</strong>{" "}
+              {etatCivilOptions.find((e) => e.id === form.watch("etat_civil"))?.name || "Non renseigné"}
+            </div>
+            <div>
+              <strong>Profession:</strong> {form.watch("profession") || "Non renseigné"}
+            </div>
+            <div>
+              <strong>Langue préférée:</strong>{" "}
+              {langueOptions.find((l) => l.id === form.watch("langue_preferee"))?.name || "Non renseigné"}
             </div>
           </CardContent>
         </Card>
