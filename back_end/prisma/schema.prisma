@@ -8,11 +8,41 @@ datasource db {
 }
 
 model Medecin {
-  id         Int     @id @default(autoincrement())
-  nom        String
-  specialite String?
+  id              Int     @id @default(autoincrement())
+  prenom          String
+  nom             String
+  sexe            String
+  matricule       String  @unique
+  specialite      String?
+  email           String? @unique
+  telephone       String?
+  photo_profil    String?
+  langue_preferee String?
+  statut          String // "Actif", "Suspendu", "Inactif"
+  bio             String?
+  role            String? // "Médecin", "Chef", "Consultant"
 
-  patients Patient[]
+  serviceId Int?
+  service   Service? @relation(fields: [serviceId], references: [id])
+
+  created_at      DateTime          @default(now())
+  updated_at      DateTime          @updatedAt
+  Patient         Patient[]
+  ExamenMedical   ExamenMedical[]
+  PointageMedecin PointageMedecin[]
+  RendezVous      RendezVous[]
+}
+
+model RendezVous {
+  id        Int      @id @default(autoincrement())
+  patientId Int
+  medecinId Int
+  date      DateTime
+  statut    String // "prévu", "en cours", "terminé", "annulé"
+  motif     String?
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  medecin Medecin @relation(fields: [medecinId], references: [id], onDelete: Cascade)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -59,9 +89,22 @@ model Patient {
   pathologies       Pathologie[]
   antecedents       AntecedentMedical[]
   assurances        Assurance[]
+  dossiers_medicaux DossierMedical[]
   credentials       Authentification?
   medecin           Medecin?            @relation(fields: [medecinId], references: [id])
   medecinId         Int?
+  RendezVous        RendezVous[]
+}
+
+model Service {
+  id          Int     @id @default(autoincrement())
+  nom         String  @unique
+  description String?
+
+  medecins Medecin[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model ContactUrgence {
@@ -206,4 +249,89 @@ model TypeIdentite {
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+}
+
+model DossierMedical {
+  id          Int      @id @default(autoincrement())
+  patient_id  Int
+  patient     Patient  @relation(fields: [patient_id], references: [id], onDelete: Cascade)
+  date_visite DateTime
+  notes       String?
+
+  signesVitaux SigneVital[]
+  medicaments  Medicament[]
+  examens      ExamenMedical[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([patient_id])
+}
+
+model SigneVital {
+  id         Int            @id @default(autoincrement())
+  dossier_id Int
+  dossier    DossierMedical @relation(fields: [dossier_id], references: [id], onDelete: Cascade)
+  date       DateTime
+
+  pression        String
+  frequence_card  Int
+  saturation_oxyg Int
+  temperature     Float
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([dossier_id])
+}
+
+model Medicament {
+  id         Int            @id @default(autoincrement())
+  dossier_id Int
+  dossier    DossierMedical @relation(fields: [dossier_id], references: [id], onDelete: Cascade)
+  nom        String
+  dosage     String
+  frequence  String
+  date_debut DateTime
+  date_fin   DateTime?
+  statut     String
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([dossier_id])
+}
+
+model ExamenMedical {
+  id         Int            @id @default(autoincrement())
+  dossier_id Int
+  dossier    DossierMedical @relation(fields: [dossier_id], references: [id], onDelete: Cascade)
+
+  titre    String
+  date     DateTime
+  statut   String // e.g., "Normal", "En attente"
+  resultat String?
+
+  medecin_id Int?
+  medecin    Medecin? @relation(fields: [medecin_id], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([dossier_id])
+}
+
+model PointageMedecin {
+  id        Int     @id @default(autoincrement())
+  medecinId Int
+  medecin   Medecin @relation(fields: [medecinId], references: [id], onDelete: Cascade)
+
+  date  DateTime @default(now())
+  heure String // e.g. "08:30", or could be stored as `DateTime` if needed
+  type  String // "Entrée" | "Sortie" | "Pause" etc.
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([medecinId])
 }
